@@ -1,0 +1,77 @@
+
+CHIP CPU {
+
+    IN  inM[16],
+        instruction[16],
+        reset;
+
+    OUT outM[16],
+        writeM,
+        addressM[15],
+        pc[15];
+
+    PARTS:
+   
+    Not(in=instruction[15], out=esA);
+
+    
+    Mux16(a=instruction, b=salidaAlu, sel=instruction[15], out=entradaA);
+
+   
+    And(a=instruction[15], b=instruction[5], out=cargaAdesdeC);
+    Or(a=esA, b=cargaAdesdeC, out=cargaA);
+    And(a=instruction[15], b=instruction[4], out=cargaD);
+
+    
+    ARegister(in=entradaA, load=cargaA, out=salidaA);
+    DRegister(in=salidaAlu, load=cargaD, out=salidaD);
+
+    
+    Mux16(a=salidaA, b=inM, sel=instruction[12], out=operandoY);
+
+   
+    ALU(x=salidaD,
+        y=operandoY,
+        zx=instruction[11], nx=instruction[10],
+        zy=instruction[9],  ny=instruction[8],
+        f=instruction[7],   no=instruction[6],
+        out=salidaAlu, zr=esCero, ng=esNegativo);
+
+   
+    Or16(a=salidaAlu,
+         b[0]=false,b[1]=false,b[2]=false,b[3]=false,
+         b[4]=false,b[5]=false,b[6]=false,b[7]=false,
+         b[8]=false,b[9]=false,b[10]=false,b[11]=false,
+         b[12]=false,b[13]=false,b[14]=false,b[15]=false,
+         out=outM);
+
+    And(a=instruction[15], b=instruction[3], out=writeM);
+    Or16(a=salidaA,
+         b[0]=false,b[1]=false,b[2]=false,b[3]=false,
+         b[4]=false,b[5]=false,b[6]=false,b[7]=false,
+         b[8]=false,b[9]=false,b[10]=false,b[11]=false,
+         b[12]=false,b[13]=false,b[14]=false,b[15]=false,
+         out[0..14]=addressM);
+
+    
+    Not(in=esNegativo, out=noNegativo);
+    Not(in=esCero, out=noCero);
+    And(a=noNegativo, b=noCero, out=esPositivo);
+
+    And(a=instruction[0], b=esNegativo, out=saltaLT);
+    And(a=instruction[1], b=esCero, out=saltaEQ);
+    And(a=instruction[2], b=esPositivo, out=saltaGT);
+
+    Or(a=saltaLT, b=saltaEQ, out=saltaLEQ);
+    Or(a=saltaLEQ, b=saltaGT, out=saltaSegunCondicion);
+    And(a=instruction[15], b=saltaSegunCondicion, out=cargarPC);
+
+    
+    PC(in=salidaA, load=cargarPC, inc=true, reset=reset, out=salidaPC);
+    Or16(a=salidaPC,
+         b[0]=false,b[1]=false,b[2]=false,b[3]=false,
+         b[4]=false,b[5]=false,b[6]=false,b[7]=false,
+         b[8]=false,b[9]=false,b[10]=false,b[11]=false,
+         b[12]=false,b[13]=false,b[14]=false,b[15]=false,
+         out[0..14]=pc);
+}

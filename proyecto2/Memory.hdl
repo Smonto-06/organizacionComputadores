@@ -1,0 +1,48 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/5/Memory.hdl
+/**
+ * The complete address space of the Hack computer's memory,
+ * including RAM and memory-mapped I/O.
+ */
+CHIP Memory {
+    IN in[16], load, address[15];
+    OUT out[16];
+
+    PARTS:
+  
+
+    Not(in=address[14], out=notA14);
+    Not(in=address[13], out=notA13);
+
+    
+    And(a=load, b=notA14, out=loadRam);
+    And(a=address[14], b=notA13, out=screenRegion);
+    And(a=load, b=screenRegion, out=loadScreen);
+
+   
+    RAM16K(in=in, load=loadRam, address=address[0..13], out=ramOut);
+    Screen(in=in, load=loadScreen, address=address[0..12], out=screenOut);
+    Keyboard(out=keyOut);
+
+ 
+    Or8Way(in[0]=address[0], in[1]=address[1], in[2]=address[2], in[3]=address[3],
+           in[4]=address[4], in[5]=address[5], in[6]=address[6], in[7]=address[7], out=orLow8);
+    Or(a=address[8], b=address[9], out=or89);
+    Or(a=address[10], b=address[11], out=or1011);
+    Or(a=or89, b=or1011, out=or8to11);
+    Or(a=or8to11, b=address[12], out=or8to12);
+    Or(a=orLow8, b=or8to12, out=anyLow13);
+    Not(in=anyLow13, out=is6000);
+
+    Mux16(a[0]=false,a[1]=false,a[2]=false,a[3]=false,
+          a[4]=false,a[5]=false,a[6]=false,a[7]=false,
+          a[8]=false,a[9]=false,a[10]=false,a[11]=false,
+          a[12]=false,a[13]=false,a[14]=false,a[15]=false,
+          b=keyOut, sel=is6000, out=keyOrZero);
+
+  
+    Mux16(a=screenOut, b=keyOrZero, sel=address[13], out=ioOut);
+    Mux16(a=ramOut, b=ioOut, sel=address[14], out=out);
+}

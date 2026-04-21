@@ -1,0 +1,25 @@
+
+CHIP Computer {
+
+    IN reset;
+
+    PARTS:
+    
+    CPU(inM=salidaMemoria,
+        instruction=instruccionActual,
+        reset=reset,
+        outM=valorParaMemoria,
+        writeM=escrituraMemoria,
+        addressM=direccionMemoria,
+        pc=contadorPrograma);
+
+    
+    Memory(in=valorParaMemoria,
+           load=escrituraMemoria,
+           address=direccionMemoria,
+           out=salidaMemoria);
+
+    
+    ROM32K(address=contadorPrograma,
+           out=instruccionActual);
+}
