@@ -1,0 +1,64 @@
+/*********
+* ALU extendida con comando de corrimiento:
+* Se reconoce cuando zx=0, nx=0, zy=0, ny=0, no=1.
+* En ese caso, f define dirección:
+*   f=0 -> shift left  (result = in[15])
+*   f=1 -> shift right (result = in[0])
+*********/
+CHIP ALU {
+  IN x[16], y[16], zx, nx, zy, ny, f, no;
+  OUT out[16], zr, ng, result;
+
+  PARTS:
+  
+  Mux16(a=x,
+        b[0]=false,b[1]=false,b[2]=false,b[3]=false,
+        b[4]=false,b[5]=false,b[6]=false,b[7]=false,
+        b[8]=false,b[9]=false,b[10]=false,b[11]=false,
+        b[12]=false,b[13]=false,b[14]=false,b[15]=false,
+        sel=zx, out=x0);
+  Not16(in=x0, out=nx0);
+  Mux16(a=x0, b=nx0, sel=nx, out=x1);
+
+  Mux16(a=y,
+        b[0]=false,b[1]=false,b[2]=false,b[3]=false,
+        b[4]=false,b[5]=false,b[6]=false,b[7]=false,
+        b[8]=false,b[9]=false,b[10]=false,b[11]=false,
+        b[12]=false,b[13]=false,b[14]=false,b[15]=false,
+        sel=zy, out=y0);
+  Not16(in=y0, out=ny0);
+  Mux16(a=y0, b=ny0, sel=ny, out=y1);
+
+  And16(a=x1, b=y1, out=outAnd);
+  Add16(a=x1, b=y1, out=outAdd);
+  Mux16(a=outAnd, b=outAdd, sel=f, out=outxy);
+
+  Not16(in=outxy, out=noutxy);
+  Mux16(a=outxy, b=noutxy, sel=no, out=normalOut);
+
+
+  Not(in=zx, out=nzx);
+  Not(in=nx, out=nnx);
+  Not(in=zy, out=nzy);
+  Not(in=ny, out=nny);
+
+  And(a=nzx, b=nnx, out=okx);
+  And(a=nzy, b=nny, out=oky);
+  And(a=okx, b=oky, out=okxy);
+  And(a=okxy, b=no, out=shiftCmd);
+
+
+  Shifter(in=x1, direction=f, out=shiftOut, result=shiftResult);
+
+ 
+  Mux16(a=normalOut, b=shiftOut, sel=shiftCmd, out=out,
+        out[0..7]=outls, out[8..15]=ouths, out[15]=ng);
+
+  
+  Mux(a=false, b=shiftResult, sel=shiftCmd, out=result);
+
+  Or8Way(in=outls, out=orL);
+  Or8Way(in=ouths, out=orH);
+  Or(a=orL, b=orH, out=orAll);
+  Not(in=orAll, out=zr);
+}
