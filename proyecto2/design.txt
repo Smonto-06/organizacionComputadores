@@ -1,0 +1,12 @@
+Instrucción tipo C:
+111 a cccccc ddd jjj
+
+Comando shift left:
+dest=reg << 1
+Ejemplo: D=M<<1
+Binario: 1111001001010000
+
+Comando shift right:
+dest=reg >> 1
+Ejemplo: AM=D>>1
+Binario: 1110000011101000
