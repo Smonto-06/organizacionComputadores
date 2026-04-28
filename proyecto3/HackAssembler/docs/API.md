@@ -1,22 +1,13 @@
-## Tablas
-- `TABLA_DEST`
-- `TABLA_COMP`
-- `TABLA_JUMP`
-- `SIMBOLOS_PREDEFINIDOS`
+# API (documentación de clases)
 
-## Funciones principales
-- `load_commands(ruta_entrada)`
-- `primera_pasada(comandos, simbolos)`
-- `segunda_pasada(comandos, simbolos)`
-- `ensamblar(ruta_entrada)`
-- `main()`
+## Clase: `HackAssembler`
+Clase del ensamblador.
+Se encarga de traducir archivos `.asm` a `.hack`.
 
-## Funciones de apoyo
-- `es_etiqueta(comando)`
-- `is_a_instruction(comando)`
-- `simbolo_valido(simbolo)`
-- `normalizar_dest(destino)`
-- `parse_c_instruction(comando)`
+## Clase: `ErrorEnsamblador`
+Clase de excepción del ensamblador.
+Se usa para reportar errores con número de línea.
 
-## Error personalizado
-- `ErrorEnsamblador`
+## Clase: `HackDisassembler`
+Clase del desensamblador.
+Se encarga de traducir archivos `.hack` a `.asm`.
