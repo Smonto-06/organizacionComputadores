@@ -1,26 +1,49 @@
 # Diseño
 
-## ¿Qué hace el programa?
-Este programa toma un archivo `.asm` de Hack y lo convierte a `.hack` (binario de 16 bits).
-También entiende corrimientos.
+## Diagrama de clases (Assembler + Disassembler)
 
-## ¿Qué resuelve?
-- Lee líneas normales, comentarios y etiquetas.
-- Traduce instrucciones tipo A y tipo C.
-- Maneja símbolos (predefinidos + variables nuevas).
-- Si hay un error, dice en qué línea está.
-- Si falla, borra el archivo de salida incompleto.
+```mermaid
+classDiagram
+    class HackAssembler {
+      +cargar_comandos(ruta_entrada)
+      +primera_pasada(comandos, simbolos)
+      +segunda_pasada(comandos, simbolos)
+      +ensamblar(ruta_entrada)
+    }
 
-## ¿Cómo está organizado?
-Todo está en `src/HackAssembler.py` y se divide por funciones:
-- Cargar y limpiar líneas.
-- Primera pasada: guardar etiquetas.
-- Segunda pasada: traducir todo a binario.
-- Guardar el `.hack` final.
+    class ErrorEnsamblador {
+      +numero_linea
+      +mensaje
+      +__str__()
+    }
 
-## Flujo
-1. Carga el `.asm`.
-2. Guarda etiquetas con su dirección.
-3. Traduce instrucciones A/C.
-4. Escribe el `.hack`.
-5. Si algo está mal, corta y muestra error.
+    class HackDisassembler {
+      +COMP_TABLE
+      +DEST_TABLE
+      +JUMP_TABLE
+      +translate()
+      -_build_output_path()
+      -_read_input_lines()
+      -_translate_instruction(bits, line_number)
+      -_translate_a_instruction(bits)
+      -_translate_c_instruction(bits, line_number)
+      -_write_output(translated_lines)
+    }
+
+    HackAssembler ..> ErrorEnsamblador : usa
+```
+
+## Resumen de funcionamiento
+
+### Ensamblador (`HackAssembler.py`)
+- Lee un `.asm`.
+- Hace dos pasadas para resolver etiquetas/símbolos.
+- Traduce A/C a binario y genera `.hack`.
+- Si hay error, informa línea y elimina salida parcial.
+
+### Desensamblador (`HackDisassembler.py`)
+- Lee un `.hack`.
+- Valida formato de línea (16 bits, solo 0/1).
+- Traduce instrucciones A/C a `.asm`.
+- Genera salida `<nombre>Dis.asm`.
+- Si hay error, informa línea y elimina salida parcial.
