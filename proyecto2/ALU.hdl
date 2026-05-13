@@ -4,7 +4,7 @@ CHIP ALU {
   OUT out[16], zr, ng, result;
 
   PARTS:
-  // Camino ALU estándar (nand2tetris)
+
   Mux16(a=x,
         b[0]=false,b[1]=false,b[2]=false,b[3]=false,
         b[4]=false,b[5]=false,b[6]=false,b[7]=false,
